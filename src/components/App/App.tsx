@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReactPaginateModule from "react-paginate";
 import type { ReactPaginateProps } from "react-paginate";
 import type { ComponentType } from "react";
@@ -9,7 +9,7 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import MovieGrid from "../MovieGrid/MovieGrid";
 import { fetchMovies } from "../../services/movieService";
 import MovieModal from "../MovieModal/MovieModal";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import Loader from "../Loader/Loader";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
@@ -23,15 +23,21 @@ const ReactPaginate = (
 
 function App() {
   const [showMovie, setShowMovie] = useState<Movie | null>(null);
-  const [topic, setTopic] = useState<string | null>(null);
+  const [topic, setTopic] = useState<string>("");
   const [page, setPage] = useState<number>(1);
 
   const { data, isLoading, isError, isSuccess } = useQuery({
     queryKey: ["myQueryKey", topic, page],
     queryFn: () => fetchMovies(topic, page),
     placeholderData: keepPreviousData,
-    enabled: topic !== null,
+    enabled: topic.length > 0,
   });
+
+  useEffect(() => {
+    if (isSuccess && topic && data?.results.length === 0) {
+      toast.error("No movies found for your request.");
+    }
+  }, [isSuccess, data, topic]);
 
   const openPopup = (movie: Movie) => {
     setShowMovie(movie);
@@ -42,6 +48,7 @@ function App() {
   };
 
   const onSubmit = async (query: string) => {
+    setPage(1);
     setTopic(query);
   };
 

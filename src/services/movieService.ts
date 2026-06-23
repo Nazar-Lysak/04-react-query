@@ -8,7 +8,7 @@ interface FetchMoviesResponse {
 
 const TOKEN = import.meta.env.VITE_TMDB_TOKEN;
 
-export const fetchMovies = async (findMovie : string | null, page : number): Promise<FetchMoviesResponse> => {
+export const fetchMovies = async (findMovie : string, page : number): Promise<FetchMoviesResponse> => {
   const {data} = await axios.get<FetchMoviesResponse>("https://api.themoviedb.org/3/search/movie", {
     params: {
       query: findMovie,
@@ -18,8 +18,6 @@ export const fetchMovies = async (findMovie : string | null, page : number): Pro
       Authorization: `Bearer ${TOKEN}`,
     },
   });
-
-  console.log(data)
 
   return data;
 };
